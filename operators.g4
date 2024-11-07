@@ -45,7 +45,7 @@ VAR : [a-zA-Z_][a-zA-Z0-9_]*;
 
 
 //for when the type just does not matter
-GENERIC : (NUM | FLOAT | STRING | SING_STRING | BOOL);
+GENERIC : (NUM | FLOAT | STRING | SING_STRING | BOOL | VAR);
 
 //complex types
 ARRAY : '['(GENERIC(','GENERIC)*','?)?']';
