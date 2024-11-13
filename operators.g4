@@ -1,13 +1,25 @@
 grammar operators;
 //NOTE TO SELF: ORDER IS IMPORTANT, DON'T MOVE STUFF FOR FUN
 
-//assignment rules
-start : ((VAR(ASSIGN|APLUS|AMINUS|MMULT|DMULT) next)'\n'*)*;
 
+start : (control | assign)*;
+
+
+control : IF(truth(AND|OR|NOT|EQQ|NOT_EQQ|Gr_EQQ|LESS_EQQ|LESS|GR)truth|(truth))+':''\n'INDENT assign*
+            (ELIF (truth(AND|OR|NOT|EQQ|NOT_EQQ|Gr_EQQ|LESS_EQQ|LESS|GR)truth|(truth))+':''\n'INDENT assign*)*
+            ((ELSE)':''\n'INDENT assign*)?;
+
+//assignment rules
+assign : ((VAR(ASSIGN|APLUS|AMINUS|MMULT|DMULT) next)'\n'*);
+
+//truth statements
+truth : '(' truth ')'                        // Parentheses for nested expressions
+      | truth (AND | OR | NOT | EQQ | NOT_EQQ | Gr_EQQ | LESS_EQQ | LESS | GR) truth
+      | NOT truth                                                            // Chained conditions
+      | next;
 
 next : ((operation)(partial_opp)*
- | string_concat
- | string_concat*string_mult string_concat*
+
  | VAR
  | NUM
  | SIGNED_NUM
@@ -18,6 +30,19 @@ next : ((operation)(partial_opp)*
  | ARRAY);
 
 
+//control symbols
+IF : 'if';
+ELSE : 'else';
+ELIF: 'elif';
+AND: 'and';
+NOT: 'not';
+OR: 'or';
+EQQ: '==';
+NOT_EQQ : '!=';
+LESS_EQQ : '<=';
+Gr_EQQ : '>=';
+GR : '>';
+LESS : '<';
 
 //opp symbols
 PLUS : '+';
@@ -36,13 +61,13 @@ DMULT : '/=';
 //data types
 NUM : ('0' | [1-9] [0-9]*);
 SIGNED_NUM : '-'? ('0' | [1-9] [0-9]*);
-FLOAT : NUM'.'[0-9]+;
+FLOAT : SIGNED_NUM'.'[0-9]+;
 BOOL : 'True' | 'False';
 STRING : '"'[a-zA-Z0-9_ ]*'"';
 SING_STRING : '\''[a-zA-Z0-9_ ]*'\'';
 
 //numeric operations
-operation : ((NUM|FLOAT|BOOL|SIGNED_NUM|VAR) (PLUS | MINUS | MULT | DIV | MOD) (NUM|FLOAT|BOOL|SIGNED_NUM|VAR|));
+operation : ((NUM|FLOAT|BOOL|SIGNED_NUM|VAR|STRING|SING_STRING) (PLUS | MINUS | MULT | DIV | MOD) (NUM|FLOAT|BOOL|SIGNED_NUM|VAR|STRING|SING_STRING));
 //allows for the chaining of many operations
 partial_opp : ((PLUS | MINUS | MULT | DIV | MOD) (NUM|FLOAT|BOOL|SIGNED_NUM|VAR))+;
 
@@ -57,14 +82,6 @@ GENERIC : (NUM | FLOAT | STRING | SING_STRING | BOOL | VAR | SIGNED_NUM);
 //complex types
 ARRAY : '['(GENERIC(','' '*GENERIC)*','?)?']';
 
-
-//string operations
-string_concat : (STRING|SING_STRING)((PLUS)(SING_STRING|STRING|string_mult))+;
-partial_concat : PLUS (SING_STRING|STRING);
-string_mult : (STRING | NUM | SING_STRING|string_concat)((MULT)(NUM | STRING | SING_STRING|partial_concat))+;
-
-
-//simple : (STRING | SING_STRING | NUM )(PLUS|MULT)((STRING | SING_STRING | NUM ))
+INDENT : '\t';
 
 WS : [ ]+ -> skip;
-
