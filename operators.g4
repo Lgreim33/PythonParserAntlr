@@ -2,15 +2,19 @@ grammar operators;
 //NOTE TO SELF: ORDER IS IMPORTANT, DON'T MOVE STUFF FOR FUN
 
 
-start : (control | assign | '\t')*;
+start : (control | assign)*;
 
 
-control : IF(truth(AND|OR|NOT|EQQ|NOT_EQQ|Gr_EQQ|LESS_EQQ|LESS|GR)truth|(truth))+':''\n' (INDENT (control | assign))+
-            (ELIF (truth(AND|OR|NOT|EQQ|NOT_EQQ|Gr_EQQ|LESS_EQQ|LESS|GR)truth|(truth))+':''\n' (INDENT(control | assign))+)*
-            ((ELSE)':''\n' INDENT((control | assign))+)?;
+control : IF truthExpr ':' '\n'* (INDENT '\n'*(control | assign)?)+ '\n'*
+            (ELIF truthExpr ':' '\n'* (INDENT '\n'* (control | assign)?)+'\n'*)*
+            (ELSE ':' '\n'* (INDENT '\n'* (control | assign)?)+)? '\n'*;
 
-//assignment rules
-assign : ((VAR(ASSIGN|APLUS|AMINUS|MMULT|DMULT) next)'\n'*);
+
+
+assign : VAR (ASSIGN | APLUS | AMINUS | MMULT | DMULT) next '\n'*;
+
+truthExpr : truth (AND | OR | NOT | EQQ | NOT_EQQ | Gr_EQQ | LESS_EQQ | LESS | GR) truth
+          | truth;
 
 //truth statements
 truth : '(' truth ')'                        // Parentheses for nested expressions
@@ -82,6 +86,6 @@ GENERIC : (NUM | FLOAT | STRING | SING_STRING | BOOL | VAR | SIGNED_NUM);
 //complex types
 ARRAY : '['(GENERIC(','' '*GENERIC)*','?)?']';
 
-INDENT : '\t';
+INDENT : [\t];
 
-WS : [ ]+ -> skip;
+WS : [ \r]+ -> skip;
