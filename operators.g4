@@ -2,12 +2,12 @@ grammar operators;
 //NOTE TO SELF: ORDER IS IMPORTANT, DON'T MOVE STUFF FOR FUN
 
 
-start : (control | assign)*;
+start : (control | assign | '\t')*;
 
 
-control : IF(truth(AND|OR|NOT|EQQ|NOT_EQQ|Gr_EQQ|LESS_EQQ|LESS|GR)truth|(truth))+':''\n'INDENT assign*
-            (ELIF (truth(AND|OR|NOT|EQQ|NOT_EQQ|Gr_EQQ|LESS_EQQ|LESS|GR)truth|(truth))+':''\n'INDENT assign*)*
-            ((ELSE)':''\n'INDENT assign*)?;
+control : IF(truth(AND|OR|NOT|EQQ|NOT_EQQ|Gr_EQQ|LESS_EQQ|LESS|GR)truth|(truth))+':''\n' (INDENT (control | assign))+
+            (ELIF (truth(AND|OR|NOT|EQQ|NOT_EQQ|Gr_EQQ|LESS_EQQ|LESS|GR)truth|(truth))+':''\n' (INDENT(control | assign))+)*
+            ((ELSE)':''\n' INDENT((control | assign))+)?;
 
 //assignment rules
 assign : ((VAR(ASSIGN|APLUS|AMINUS|MMULT|DMULT) next)'\n'*);
