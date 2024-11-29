@@ -2,93 +2,40 @@ grammar experimental;
 
 // Combined grammar with lexer and parser rules.
 
-tokens { INDENT , DEDENT }
 
+tokens { INDENT, DEDENT }
+@lexer::header {
+  import com.yuvalshavit.antlr4.DenterHelper;
+}
 @lexer::members {
-  private java.util.LinkedList<Token> tokens = new java.util.LinkedList<>();
-  private java.util.Stack<Integer> indents = new java.util.Stack<>();
-  private Token lastToken = null;
-  private static final int TAB_SIZE = 4;
+  private final DenterHelper denter = new DenterHelper(NL, experimentalParser.INDENT, experimentalParser.DEDENT) {
+    @Override
+    public Token pullToken() {
+    System.out.println("Pulled Token: " + token.getText() + " (" + token.getType() + ")");
+      return experimentalLexer.super.nextToken();
+    }
+  };
 
   @Override
-  public void emit(Token t) {
-    super.setToken(t);
-    tokens.offer(t);
-    System.out.println("Emitted token: " + t.getText() + " of type " +
+  public Token nextToken() {
+    return denter.nextToken();
   }
-
-@Override
-public Token nextToken() {
-    if (_input.LA(1) == EOF && !indents.isEmpty()) {
-        // Emit DEDENT tokens for all remaining indents
-        while (!indents.isEmpty()) {
-            this.emit(createDedent());
-            indents.pop();
-        }
-        // Emit EOF token
-        this.emit(commonToken(EOF, "<EOF>"));
-    }
-
-    Token next = super.nextToken();
-    if (next.getChannel() == Token.DEFAULT_CHANNEL) {
-        this.lastToken = next;
-    }
-
-    return tokens.isEmpty() ? next : tokens.poll();
 }
 
 
-  private Token createDedent() {
-    CommonToken dedent = commonToken(experimental.DEDENT, "");
-    dedent.setLine(this.lastToken.getLine());
-    return dedent;
-  }
+start :  (BIGCOMMENT | COMMENT | control | loop | assign)* EOF;
 
-  private CommonToken commonToken(int type, String text) {
-    int stop = getCharIndex() - 1;
-    int start = text.isEmpty() ? stop : stop - text.length() + 1;
-    return new CommonToken(_tokenFactorySourcePair, type, DEFAULT_TOKEN_CHANNEL, start, stop);
-  }
-
-static int getIndentationCount(String spaces) {
-  int count = 0;
-  boolean hasSpaces = false;
-  boolean hasTabs = false;
-
-  for (char ch : spaces.toCharArray()) {
-    switch (ch) {
-      case '\t':
-        hasTabs = true;
-        count += TAB_SIZE - (count % TAB_SIZE); // Tabs count as TAB_SIZE spaces
-        break;
-      case ' ':
-        hasSpaces = true;
-        count++;
-        break;
-    }
-  }
-
-  if (hasSpaces && hasTabs) {
-    throw new RuntimeException("Mixed spaces and tabs in indentation");
-  }
-
-  return count;
-}
-}
-
-start : NEWLINE * (BIGCOMMENT | COMMENT | control | loop | assign)* EOF;
-
-control : IF truthExpr ((AND | OR) truthExpr)* ':' NEWLINE  statement*
-        (ELIF truthExpr ':' NEWLINE INDENT statement* DEDENT)*
-        (ELSE ':' NEWLINE INDENT statement* DEDENT)?
+control : IF truthExpr ((AND | OR) truthExpr)* ':'  INDENT statement* DEDENT
+        (ELIF truthExpr ':' NL INDENT statement* DEDENT)*
+        (ELSE ':' NL INDENT statement* DEDENT)?
         ;
 
 loop : whileLoop | forLoop;
 
-whileLoop : 'while' truthExpr ':' NEWLINE INDENT statement* DEDENT;
-forLoop : 'for' VAR 'in' generic':' NEWLINE INDENT statement* DEDENT;
+whileLoop : 'while' truthExpr ':'  NL INDENT statement* DEDENT;
+forLoop : 'for' VAR 'in' generic':' NL INDENT statement* DEDENT;
 
-assign : VAR ((ASSIGN | APLUS | AMINUS | MMULT | DMULT) next) NEWLINE*;
+assign : VAR ((ASSIGN | APLUS | AMINUS | MMULT | DMULT) next) NL*;
 
 statement : BIGCOMMENT | COMMENT | control | loop | assign;
 
@@ -116,8 +63,8 @@ partial_opp : ((PLUS | MINUS | MULT | DIV | MOD) (NUM|FLOAT|BOOL|SIGNED_NUM|VAR)
 
 
 //ingore comments
-COMMENT : '#' .*? NEWLINE ->skip ;
-BIGCOMMENT : '\'\'\'' NEWLINE* .*? NEWLINE* '\'\'\'' -> skip;
+COMMENT : '#' .*? NL ->skip ;
+BIGCOMMENT : '\'\'\'' NL* .*? NL* '\'\'\'' -> skip;
 
 // Keywords and operators
 IF : 'if';
@@ -148,8 +95,8 @@ NUM : ('0' | [1-9] [0-9]*);
 SIGNED_NUM : '-'? ('0' | [1-9] [0-9]*);
 FLOAT : SIGNED_NUM '.' [0-9]+;
 BOOL : 'True' | 'False';
-STRING : '"' [a-zA-Z0-9_ ]* '"';
-SING_STRING : '\'' [a-zA-Z0-9_ ]* '\'';
+STRING : '"' .*? '"';
+SING_STRING : '\'' .*? '\'';
 VAR : [a-zA-Z_][a-zA-Z0-9_]*;
 generic : (NUM | FLOAT | STRING | SING_STRING | BOOL | VAR | SIGNED_NUM);
 array : BRACK (generic (',' generic)*)? RBRACK;
@@ -157,25 +104,6 @@ array : BRACK (generic (',' generic)*)? RBRACK;
 BRACK : '[';
 RBRACK : ']';
 COLON: ':';
-NEWLINE
- : ('\r'? '\n') [ \t]* {
-     String leadingWhitespace = getText().replaceAll("[\r\n]+", ""); // Extract leading tabs/spaces
-     int indent = getIndentationCount(leadingWhitespace); // Calculate indentation
-     int previous = indents.isEmpty() ? 0 : indents.peek(); // Get last indentation level
+NL: ('\r'? '\n''\t'*);
+WS : [ \t]+ -> channel(HIDDEN);
 
-     if (indent == previous) {
-         skip(); // No change in indentation level
-     } else if (indent > previous) {
-         indents.push(indent);
-         emit(commonToken(experimental.INDENT, leadingWhitespace)); // Emit INDENT token
-     } else {
-         while (!indents.isEmpty() && indents.peek() > indent) {
-             emit(createDedent()); // Emit DEDENT tokens for each unmatched level
-             indents.pop();
-         }
-     }
-     setText("\n"); // Emit the newline token with proper text
-   }
- ;
-
-WS : [ \r]+ -> skip;
