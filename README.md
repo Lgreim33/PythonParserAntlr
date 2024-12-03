@@ -7,7 +7,8 @@ How it works:
 
 Our start rule is defined in such a way that the program can have as many control blocks, assignment statements, or loops as you want, in any order of declaration. 
 
-An assignmnet is the simplest of these, as it will never contain itseld or one of the other main three rule structures. It is defined as a valid variable name, one of the main equal sign operators, and some value or another variable. 
+An assignmnet is the simplest of these, as it will never contain itseld or one of the other main three rule structures. It is defined as a valid variable name, one of the main equal sign operators, and some value or another variable. It also accepts operations, so you could 
+set a variable equal to the result of an equation: such as "x = 4 + 3 * 5".
 
 The control statement is the if...elif...else structure, in which you must define an if block, you may define as many elif blocks asy youd like with an if statement preceeding them, and you can have only one else block. Each block (exluding the else block) must contain
 a truth expression, which are made up of grammar rules. Truth statements can be incredibly simple like: "if True:", or you can chain truth expressions together: "if x==7 and y==1:". It does not necessarily need to be a check for equality, as all python comparison operators are supported. To end the truth expression you must follow it with a colon ":," a newline, and a tab. Note that this implementation uses tabs, not spaces, so make sure you set your IDE to use the actual tab character, or it will not recognie the indentation. The body of the control block is made up of block statements, which contain smaller statements as it's children, these statemnets can be another control block, loops, or simply assignment statements. The indentation of the statement denotes which block statement the statement belongs to. This captures the nesting behavior in a way that allows for seamless tree parsing and no extra java code. 
