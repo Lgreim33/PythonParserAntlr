@@ -1,20 +1,24 @@
 grammar experimental;
 
-// Combined grammar with lexer and parser rules.
-
+// "Main"
 start : (NL* (control | loop | assign))* NL* EOF;
 
+// Control Block
 control : IF truthExpr ((AND | OR) truthExpr)* ':' NL* statementBlock
  		(NL* (ELIF truthExpr ':' NL* statementBlock)*)?
  		(NL* ELSE ':' NL* statementBlock)? NL*;
 
+// Loop blocks
 loop : WHILE truthExpr ((AND | OR) truthExpr)* ':' NL* statementBlock?
      | FOR VAR IN (rangeFunc | array | VAR) ':' NL* statementBlock?;
 
+// Assignment statement
 assign : VAR ((ASSIGN | APLUS | AMINUS | MMULT | DMULT) next) NL?;
 
+// Child of Statement Block
 statement : control | loop | assign;
 
+// Child of some greater control structure
 statementBlock : (INDENT statement?)+;
 
 // Components of control
