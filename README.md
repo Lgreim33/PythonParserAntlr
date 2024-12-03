@@ -5,7 +5,8 @@ This antlr4 grammar was written in a Java enviorment using the IntelliJ IDEA Ult
 
 How it works: 
 
-Our start rule is defined in such a way that the program can have as many control blocks, assignment statements, or loops as you want, in any order of declaration. 
+Our start rule is defined in such a way that the program can have as many control blocks, assignment statements, or loops as you want, in any order of declaration. These are children of 
+start, and are treated as though they had "global" scope.
 
 An assignmnet is the simplest of these, as it will never contain itseld or one of the other main three rule structures. It is defined as a valid variable name, one of the main equal sign operators, and some value or another variable. It also accepts operations, so you could 
 set a variable equal to the result of an equation: such as "x = 4 + 3 * 5".
@@ -22,7 +23,10 @@ Comments, as stated before, are defined as lexer rules that the parser will simp
 "'''" to another "'''".
 
 
+
+
 How to Use: 
+
 To test our grammar, you can use any Antlr4 enviormnet you would like, however this will walk you through how to run it in IntelliJ.
 
 1. Download the experimental.g4 file
