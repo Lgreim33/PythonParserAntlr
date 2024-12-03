@@ -3,9 +3,6 @@
 
 This antlr4 grammar was written in a Java enviorment using the IntelliJ IDEA Ultimate IDE, with the appropriate Antlr4 plugin to generate the grammar recognizer and the parse tree.
 
-To test our grammar, you can use any ANtlr4 enviormnet you would like, however this will walk you through how to run it in IntelliJ.
-
-
 How it works: 
 
 Our start rule is defined in such a way that the program can have as many control blocks, assignment statements, or loops as you want, in any order of declaration. 
@@ -13,10 +10,19 @@ Our start rule is defined in such a way that the program can have as many contro
 An assignmnet is the simplest of these, as it will never contain itseld or one of the other main three rule structures. It is defined as a valid variable name, one of the main equal sign operators, and some value or another variable. 
 
 The control statement is the if...elif...else structure, in which you must define an if block, you may define as many elif blocks asy youd like with an if statement preceeding them, and you can have only one else block. Each block (exluding the else block) must contain
-a truth expression, which are made up of grammar rules. Truth statements can be incredibly simple like: "if True:", or you can chain truth expressions together: "if x==7 and y==1:". It does not necessarily need to be a check for equality, as all python comparison operators are supported. To end the truth expression you must follow it with a colon ":," a newline, and a tab. Not that this implementation uses tabs, not spaces, so make sure you set your IDE to use the actual tab character, or it will not recognie the indentation. The body of the control block is made up of block statements, wich contain smaller statements, these statemnets can be another control block, loops, or simply assignment statements. The indentation of the statement denotes which block statement the statement belongs to. This captures the nesting behavior in a way that allows for seamless tree parsing and no extra java code. 
+a truth expression, which are made up of grammar rules. Truth statements can be incredibly simple like: "if True:", or you can chain truth expressions together: "if x==7 and y==1:". It does not necessarily need to be a check for equality, as all python comparison operators are supported. To end the truth expression you must follow it with a colon ":," a newline, and a tab. Note that this implementation uses tabs, not spaces, so make sure you set your IDE to use the actual tab character, or it will not recognie the indentation. The body of the control block is made up of block statements, which contain smaller statements as it's children, these statemnets can be another control block, loops, or simply assignment statements. The indentation of the statement denotes which block statement the statement belongs to. This captures the nesting behavior in a way that allows for seamless tree parsing and no extra java code. 
+
+The for and while loops, are combined into one rule for the sake of simplicity. 'while' is incredibly similar to the if statement, as it rewuires the keyword 'while,' a truth expression, a colon, then a newline and a tab. It then uses the same statement block model 
+as the control statemnt. The for stemtement is slightly different, as it requires the keyword 'for,' followed by a variable, followed by the keyword 'in,' which then can be followed by
+an array, variable, or the range function defined as: 'range(some_number,optional_number,optional_number,...),' then finally the colon, newline, and tab. Again, the for statement uses the 
+same statement block system as the control structure and while loop. 
+
+Comments, as stated before, are defined as lexer rules that the parser will simply skip over if it sees something is denoted as a comment. Which is: '#' unitl a newline is declared, or
+"'''" to another "'''".
 
 
-The for and while loops, are combined into one rule for the sake of simplicity. 'while' is incredibly similar to the if statement, as it rewuires the keyword 'while,' a truth expression, a colon, then a newline and a tab. 
+How to Use: 
+To test our grammar, you can use any Antlr4 enviormnet you would like, however this will walk you through how to run it in IntelliJ.
 
 1. Download the experimental.g4 file
 2. Make sure you have the IntelliJ IDEA Ultimate IDE downloaded, you can access it for free with your school account
