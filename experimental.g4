@@ -2,71 +2,48 @@ grammar experimental;
 
 // Combined grammar with lexer and parser rules.
 
+start : (NL* (control | loop | assign))* NL* EOF;
 
-tokens { INDENT, DEDENT }
-@lexer::header {
-  import com.yuvalshavit.antlr4.DenterHelper;
-}
-@lexer::members {
-  private final DenterHelper denter = new DenterHelper(NL, experimentalParser.INDENT, experimentalParser.DEDENT) {
-    @Override
-    public Token pullToken() {
-    System.out.println("Pulled Token: " + token.getText() + " (" + token.getType() + ")");
-      return experimentalLexer.super.nextToken();
-    }
-  };
+control : IF truthExpr ((AND | OR) truthExpr)* ':' NL* statementBlock
+ 		(NL* (ELIF truthExpr ':' NL* statementBlock)*)?
+ 		(NL* ELSE ':' NL* statementBlock)? NL*;
 
-  @Override
-  public Token nextToken() {
-    return denter.nextToken();
-  }
-}
+loop : WHILE truthExpr ((AND | OR) truthExpr)* ':' NL* statementBlock?
+     | FOR VAR IN (rangeFunc | array | VAR) ':' NL* statementBlock?;
 
+assign : VAR ((ASSIGN | APLUS | AMINUS | MMULT | DMULT) next) NL?;
 
-start :  (BIGCOMMENT | COMMENT | control | loop | assign)* EOF;
+statement : control | loop | assign;
 
-control : IF truthExpr ((AND | OR) truthExpr)* ':'  INDENT statement* DEDENT
-        (ELIF truthExpr ':' NL INDENT statement* DEDENT)*
-        (ELSE ':' NL INDENT statement* DEDENT)?
-        ;
+statementBlock : (INDENT statement?)+;
 
-loop : whileLoop | forLoop;
-
-whileLoop : 'while' truthExpr ':'  NL INDENT statement* DEDENT;
-forLoop : 'for' VAR 'in' generic':' NL INDENT statement* DEDENT;
-
-assign : VAR ((ASSIGN | APLUS | AMINUS | MMULT | DMULT) next) NL*;
-
-statement : BIGCOMMENT | COMMENT | control | loop | assign;
-
-truthExpr : truth (AND | OR | NOT | EQQ | NOT_EQQ | Gr_EQQ | LESS_EQQ | LESS | GR) truth;
+// Components of control
+truthExpr : truth ((AND | OR | NOT | EQQ | NOT_EQQ | Gr_EQQ | LESS_EQQ | LESS | GR) truth)?;
 
 truth : OPEN truth CLOSE
       | next (AND | OR | NOT | EQQ | NOT_EQQ | Gr_EQQ | LESS_EQQ | LESS | GR) next
       | NOT truth
       | next;
+
 OPEN : '(';
 CLOSE : ')';
-next : operation(partial_opp)*
-     | VAR
-     | NUM
-     | SIGNED_NUM
-     | FLOAT
-     | BOOL
-     | STRING
-     | SING_STRING
-     | array;
 
-operation : ((NUM|FLOAT|BOOL|SIGNED_NUM|VAR|STRING|SING_STRING) (PLUS | MINUS | MULT | DIV | MOD) (NUM|FLOAT|BOOL|SIGNED_NUM|VAR|STRING|SING_STRING));
-//allows for the chaining of many operations
-partial_opp : ((PLUS | MINUS | MULT | DIV | MOD) (NUM|FLOAT|BOOL|SIGNED_NUM|VAR))+;
+rangeFunc : 'range' '(' SIGNED_NUM (',' SIGNED_NUM)* ')';
 
+next : operation (partial_opp)* | VAR | NUM | SIGNED_NUM | FLOAT | BOOL | STRING | SING_STRING | array;
 
-//ingore comments
-COMMENT : '#' .*? NL ->skip ;
-BIGCOMMENT : '\'\'\'' NL* .*? NL* '\'\'\'' -> skip;
+operation : ((NUM | FLOAT | BOOL | SIGNED_NUM | VAR | STRING | SING_STRING) (PLUS | MINUS | MULT | DIV | MOD) (NUM | FLOAT | BOOL | SIGNED_NUM | VAR | STRING | SING_STRING));
+
+partial_opp : ((PLUS | MINUS | MULT | DIV | MOD) (NUM | FLOAT | BOOL | SIGNED_NUM | VAR))+;
+
+// Ignore comments
+COMMENT : '#' .*? NL -> skip;
+BIGCOMMENT : '\'\'\'' NL? .*? NL? '\'\'\'' -> skip;
 
 // Keywords and operators
+FOR : 'for';
+IN : 'in';
+WHILE : 'while';
 IF : 'if';
 ELIF : 'elif';
 ELSE : 'else';
@@ -91,8 +68,8 @@ MMULT : '*=';
 DMULT : '/=';
 
 // Data types
-NUM : ('0' | [1-9] [0-9]*);
 SIGNED_NUM : '-'? ('0' | [1-9] [0-9]*);
+NUM : ('0' | [1-9] [0-9]*);
 FLOAT : SIGNED_NUM '.' [0-9]+;
 BOOL : 'True' | 'False';
 STRING : '"' .*? '"';
@@ -104,6 +81,7 @@ array : BRACK (generic (',' generic)*)? RBRACK;
 BRACK : '[';
 RBRACK : ']';
 COLON: ':';
-NL: ('\r'? '\n''\t'*);
-WS : [ \t]+ -> channel(HIDDEN);
+NL : '\n';
 
+WS : [ \r]+ -> skip;
+INDENT : [\t]+;
