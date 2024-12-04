@@ -1,7 +1,7 @@
 grammar experimental;
 
 // "Main"
-start : (NL* (control | loop | assign))* NL* EOF;
+start : (NL* (control | loop | assign | BIGCOMMENT | COMMENT))* NL* EOF;
 
 // Control Block
 control : IF truthExpr ((AND | OR) truthExpr)* ':' NL* statementBlock
