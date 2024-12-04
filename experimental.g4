@@ -80,7 +80,7 @@ STRING : '"' .*? '"';
 SING_STRING : '\'' .*? '\'';
 VAR : [a-zA-Z_][a-zA-Z0-9_]*;
 generic : (NUM | FLOAT | STRING | SING_STRING | BOOL | VAR | SIGNED_NUM);
-array : BRACK (generic (',' generic)*)? RBRACK;
+array : BRACK (generic (',' generic)* ','?)? RBRACK;
 
 BRACK : '[';
 RBRACK : ']';
