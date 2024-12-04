@@ -5,7 +5,7 @@ start : (NL* (control | loop | assign))* NL* EOF;
 
 // Control Block
 control : IF truthExpr ((AND | OR) truthExpr)* ':' NL* statementBlock
- 		(NL* (ELIF truthExpr ':' NL* statementBlock)*)?
+ 		(NL* (ELIF truthExpr ':' NL* statementBlock))*?
  		(NL* ELSE ':' NL* statementBlock)? NL*;
 
 // Loop blocks
