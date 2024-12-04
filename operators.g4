@@ -1,91 +1,91 @@
-grammar operators;
-//NOTE TO SELF: ORDER IS IMPORTANT, DON'T MOVE STUFF FOR FUN
+grammar experimental;
 
+// "Main"
+start : (NL* (control | loop | assign | BIGCOMMENT | COMMENT))* NL* EOF;
 
-start : (control | assign)*;
+// Control Block
+control : IF truthExpr ((AND | OR) truthExpr)* ':' NL* statementBlock
+ 		(NL* (ELIF truthExpr ':' NL* statementBlock))*?
+ 		(NL* ELSE ':' NL* statementBlock)? NL*;
 
+// Loop blocks
+loop : WHILE truthExpr ((AND | OR) truthExpr)* ':' NL* statementBlock?
+     | FOR VAR IN (rangeFunc | array | VAR) ':' NL* statementBlock?;
 
-control : IF truthExpr ':' '\n'* (INDENT '\n'*(control | assign)?)+ '\n'*
-            (ELIF truthExpr ':' '\n'* (INDENT '\n'* (control | assign)?)+'\n'*)*
-            (ELSE ':' '\n'* (INDENT '\n'* (control | assign)?)+)? '\n'*;
+// Assignment statement
+assign : VAR ((ASSIGN | APLUS | AMINUS | MMULT | DMULT) next) NL?;
 
+// Child of Statement Block
+statement : control | loop | assign;
 
+// Child of some greater control structure
+statementBlock : (INDENT statement?)+;
 
-assign : VAR (ASSIGN | APLUS | AMINUS | MMULT | DMULT) next '\n'*;
+// Components of control
+truthExpr : truth ((AND | OR | NOT | EQQ | NOT_EQQ | Gr_EQQ | LESS_EQQ | LESS | GR) truth)?;
 
-truthExpr : truth (AND | OR | NOT | EQQ | NOT_EQQ | Gr_EQQ | LESS_EQQ | LESS | GR) truth
-          | truth;
-
-//truth statements
-truth : '(' truth ')'                        // Parentheses for nested expressions
-      | truth (AND | OR | NOT | EQQ | NOT_EQQ | Gr_EQQ | LESS_EQQ | LESS | GR) truth
-      | NOT truth                                                            // Chained conditions
+truth : OPEN truth CLOSE
+      | next (AND | OR | NOT | EQQ | NOT_EQQ | Gr_EQQ | LESS_EQQ | LESS | GR) next
+      | NOT truth
       | next;
 
-next : ((operation)(partial_opp)*
+OPEN : '(';
+CLOSE : ')';
 
- | VAR
- | NUM
- | SIGNED_NUM
- | FLOAT
- | BOOL
- | STRING
- | SING_STRING
- | ARRAY);
+rangeFunc : 'range' '(' SIGNED_NUM (',' SIGNED_NUM)* ')';
 
+next : operation (partial_opp)* | VAR | NUM | SIGNED_NUM | FLOAT | BOOL | STRING | SING_STRING | array;
 
-//control symbols
+operation : ((NUM | FLOAT | BOOL | SIGNED_NUM | VAR | STRING | SING_STRING) (PLUS | MINUS | MULT | DIV | MOD) (NUM | FLOAT | BOOL | SIGNED_NUM | VAR | STRING | SING_STRING));
+
+partial_opp : ((PLUS | MINUS | MULT | DIV | MOD) (NUM | FLOAT | BOOL | SIGNED_NUM | VAR))+;
+
+// Ignore comments
+COMMENT : '#' .*? NL -> skip;
+BIGCOMMENT : '\'\'\'' NL? .*? NL? '\'\'\'' -> skip;
+
+// Keywords and operators
+FOR : 'for';
+IN : 'in';
+WHILE : 'while';
 IF : 'if';
+ELIF : 'elif';
 ELSE : 'else';
-ELIF: 'elif';
-AND: 'and';
-NOT: 'not';
-OR: 'or';
-EQQ: '==';
+AND : 'and';
+NOT : 'not';
+OR : 'or';
+EQQ : '==';
 NOT_EQQ : '!=';
 LESS_EQQ : '<=';
 Gr_EQQ : '>=';
 GR : '>';
 LESS : '<';
-
-//opp symbols
 PLUS : '+';
 MINUS : '-';
 MULT : '*';
 DIV : '/';
 MOD : '%';
-//assignment opp symbols
 ASSIGN : '=';
 APLUS : '+=';
 AMINUS : '-=';
 MMULT : '*=';
 DMULT : '/=';
 
-
-//data types
-NUM : ('0' | [1-9] [0-9]*);
+// Data types
 SIGNED_NUM : '-'? ('0' | [1-9] [0-9]*);
-FLOAT : SIGNED_NUM'.'[0-9]+;
+NUM : ('0' | [1-9] [0-9]*);
+FLOAT : SIGNED_NUM '.' [0-9]+;
 BOOL : 'True' | 'False';
-STRING : '"'[a-zA-Z0-9_ ]*'"';
-SING_STRING : '\''[a-zA-Z0-9_ ]*'\'';
-
-//numeric operations
-operation : ((NUM|FLOAT|BOOL|SIGNED_NUM|VAR|STRING|SING_STRING) (PLUS | MINUS | MULT | DIV | MOD) (NUM|FLOAT|BOOL|SIGNED_NUM|VAR|STRING|SING_STRING));
-//allows for the chaining of many operations
-partial_opp : ((PLUS | MINUS | MULT | DIV | MOD) (NUM|FLOAT|BOOL|SIGNED_NUM|VAR))+;
-
-
-//named variable
+STRING : '"' .*? '"';
+SING_STRING : '\'' .*? '\'';
 VAR : [a-zA-Z_][a-zA-Z0-9_]*;
+generic : (NUM | FLOAT | STRING | SING_STRING | BOOL | VAR | SIGNED_NUM);
+array : BRACK (generic (',' generic)* ','?)? RBRACK;
 
-
-//for when the type just does not matter
-GENERIC : (NUM | FLOAT | STRING | SING_STRING | BOOL | VAR | SIGNED_NUM);
-
-//complex types
-ARRAY : '['(GENERIC(','' '*GENERIC)*','?)?']';
-
-INDENT : [\t];
+BRACK : '[';
+RBRACK : ']';
+COLON: ':';
+NL : '\n';
 
 WS : [ \r]+ -> skip;
+INDENT : [\t]+;
