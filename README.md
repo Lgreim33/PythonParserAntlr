@@ -1,6 +1,9 @@
 # PythonParserAntlr
 
-
+REQUIREMENTS: 
+1. Java
+2. Intellij Ultimate IDEA 2024 or newer with Antlr v4 plugin, or ANLTR 4 Enviorment configured
+   
 This antlr4 grammar was written in a Java enviorment using the IntelliJ IDEA Ultimate IDE, with the appropriate Antlr4 plugin to generate the grammar recognizer and the parse tree.
 
 How it works: 
