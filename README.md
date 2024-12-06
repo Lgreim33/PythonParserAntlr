@@ -3,10 +3,10 @@
 This is a parser for Python written in Antlr4, it very simply reads in a file stream or a string of characters, and parses them accordingly into a parse tree
 
 Group Members: 
-Zachary Czarnik
-Landis Bargatze
-Josiah Manners
-William Greim
+Zachary Czarnik,
+Landis Bargatze,
+Josiah Manners,
+and William Greim
 
 
 REQUIREMENTS: 
@@ -54,6 +54,5 @@ To test our grammar, you can use any Antlr4 enviormnet you would like, however t
 
 It should be noted that any comments you write will be ignored by the parser, as they are irrelevant to the running of a program
 
-For a more visual walkthrough and explanation of the grammar, you can watch this video: 
-Link: https://youtu.be/5owmopwlkcA
+For a more visual walkthrough and explanation of the grammar, you can watch this video: https://youtu.be/5owmopwlkcA
 
