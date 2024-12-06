@@ -1,8 +1,18 @@
 # PythonParserAntlr
 
+This is a parser for Python written in Antlr4, it very simply reads in a file stream or a string of characters, and parses them accordingly into a parse tree
+
+Group Members: 
+Zachary Czarnik
+Landis Bargatze
+Josiah Manners
+William Greim
+
+
 REQUIREMENTS: 
-1. Java
-2. Intellij Ultimate IDEA 2024 or newer with Antlr v4 plugin, or ANLTR 4 Enviorment configured
+1. Intellij Ultimate IDEA 2024.2.4 or newer
+2. Antlr v4 plugin version 1.24, comes with ANTLR 4.13.2
+4. While it does not hurt to have Java installed, Intellij comes with a Java Runtime Enviorment Installed
    
 This antlr4 grammar was written in a Java enviorment using the IntelliJ IDEA Ultimate IDE, with the appropriate Antlr4 plugin to generate the grammar recognizer and the parse tree.
 
@@ -27,7 +37,6 @@ Comments, as stated before, are defined as lexer rules that the parser will simp
 
 
 
-
 How to Use: 
 
 To test our grammar, you can use any Antlr4 enviormnet you would like, however this will walk you through how to run it in IntelliJ.
@@ -36,7 +45,7 @@ To test our grammar, you can use any Antlr4 enviormnet you would like, however t
 2. Make sure you have the IntelliJ IDEA Ultimate IDE downloaded, you can access it for free with your school account
 3. Access File>Settings>Plugins. File should be at the very top of your screen.
 4. Search "Antlr v4"
-5. Install Antlr v4 and Antlr v4 Tools plugins
+5. Install Antlr v4 plugin
 6. Create a new Java project, and place the .g4 file you downloaded earlier in the src directory, which should also have a main file with som boiler plate code in it, which we can ignore
 7. Right click on the experimental.g4 file and select "Generate ANTLR recognizer"
 8. Then, right click on the "start" rule, and select "Test Rule Start," there should be a green play button next to it in the pop up menu
@@ -46,4 +55,5 @@ To test our grammar, you can use any Antlr4 enviormnet you would like, however t
 It should be noted that any comments you write will be ignored by the parser, as they are irrelevant to the running of a program
 
 For a more visual walkthrough and explanation of the grammar, you can watch this video: 
-Link:
+Link: https://youtu.be/5owmopwlkcA
+
